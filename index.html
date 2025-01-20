@@ -121,12 +121,8 @@
       let country = "";
       let languagePreference = "";
   
-      // URL de la API original
-      const apiUrl = "https://estelarbetpromociones.com/wp-content/themes/estelarbetpromociones/assets/controladores/ControllerPosts.php";
-  
-      // Proxy público para CORS Anywhere
-      const corsProxy = "https://thingproxy.freeboard.io/fetch/";
-
+      // URL de la función serverless en Netlify
+      const netlifyFunctionUrl = "/api";
   
       const addMessage = (text, sender, isLink = false) => {
         const message = document.createElement("div");
@@ -150,13 +146,12 @@
   
       const fetchContent = async (pais, idioma) => {
         try {
-          // Combina el proxy con la URL de la API
-          const response = await fetch(`${corsProxy}${apiUrl}?pais=${pais}&idioma=${idioma}`);
-
-          if (!response.ok) throw new Error("Error al conectar con la API.");
+          // Solicita datos desde la función serverless
+          const response = await fetch(`${netlifyFunctionUrl}?pais=${pais}&idioma=${idioma}`);
+          if (!response.ok) throw new Error("Error al conectar con la función de Netlify.");
   
           const data = await response.json();
-          console.log("Datos de la API:", data); // Debug: Verifica los datos en consola
+          console.log("Datos de la función serverless:", data); // Debug: Verifica los datos en consola
           displayPromotions(data);
         } catch (error) {
           console.error(error);
@@ -222,6 +217,7 @@
       askQuestion();
     });
   </script>
+  
   
   
 </body>
