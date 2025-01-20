@@ -125,7 +125,8 @@
       const apiUrl = "https://estelarbetpromociones.com/wp-content/themes/estelarbetpromociones/assets/controladores/ControllerPosts.php";
   
       // Proxy público para CORS Anywhere
-      const corsProxy = "https://cors-anywhere.herokuapp.com/";
+      const corsProxy = "https://thingproxy.freeboard.io/fetch/";
+
   
       const addMessage = (text, sender, isLink = false) => {
         const message = document.createElement("div");
@@ -151,6 +152,7 @@
         try {
           // Combina el proxy con la URL de la API
           const response = await fetch(`${corsProxy}${apiUrl}?pais=${pais}&idioma=${idioma}`);
+
           if (!response.ok) throw new Error("Error al conectar con la API.");
   
           const data = await response.json();
