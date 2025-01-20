@@ -117,19 +117,18 @@
       const messageInput = document.getElementById("messageInput");
       const sendButton = document.getElementById("sendButton");
   
-      let step = 0;
-      let country = "";
-      let languagePreference = "";
+      let step = 0; // Controla las preguntas
+      let country = ""; // Guardará el país ingresado
+      let languagePreference = ""; // Guardará el idioma ingresado
+      let category = ""; // Guardará la categoría ingresada
   
-      // URL de la función serverless en Netlify
-      const netlifyFunctionUrl = "/api";
+      const apiUrl = "/api"; // Endpoint de la función serverless
   
       const addMessage = (text, sender, isLink = false) => {
         const message = document.createElement("div");
         message.classList.add("message", sender);
   
         if (isLink) {
-          // Si es un enlace, crear un elemento <a>
           const link = document.createElement("a");
           link.href = text.url;
           link.textContent = text.title;
@@ -144,14 +143,15 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       };
   
-      const fetchContent = async (pais, idioma) => {
+      const fetchContent = async (pais, idioma, categoria) => {
         try {
-          // Solicita datos desde la función serverless
-          const response = await fetch(`${netlifyFunctionUrl}?pais=${pais}&idioma=${idioma}`);
+          const response = await fetch(
+            `${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`
+          );
+  
           if (!response.ok) throw new Error("Error al conectar con la función de Netlify.");
   
           const data = await response.json();
-          console.log("Datos de la función serverless:", data); // Debug: Verifica los datos en consola
           displayPromotions(data);
         } catch (error) {
           console.error(error);
@@ -175,32 +175,42 @@
         } else if (step === 1) {
           addMessage("¿Prefieres la información en Inglés o Español? (EN/ES)", "bot");
         } else if (step === 2) {
+          addMessage("¿Qué categoría prefieres? (casino/deportes)", "bot");
+        } else if (step === 3) {
           addMessage("Buscando promociones, por favor espera...", "bot");
-          fetchContent(country, languagePreference);
+          fetchContent(country, languagePreference, category);
         }
       };
   
       sendButton.addEventListener("click", () => {
-        const messageText = messageInput.value.trim().toUpperCase();
+        const messageText = messageInput.value.trim().toLowerCase();
         if (!messageText) return;
   
         addMessage(messageText, "user");
   
         if (step === 0) {
-          if (messageText.match(/^[A-Z]{2}$/)) {
-            country = messageText;
+          if (messageText.match(/^[a-z]{2}$/i)) {
+            country = messageText.toUpperCase();
             step++;
             askQuestion();
           } else {
             addMessage("Por favor, ingresa un código de país válido (Ejemplo: CL, PE).", "bot");
           }
         } else if (step === 1) {
-          if (messageText === "EN" || messageText === "ES") {
-            languagePreference = messageText;
+          if (messageText === "en" || messageText === "es") {
+            languagePreference = messageText.toUpperCase();
             step++;
             askQuestion();
           } else {
             addMessage("Por favor, responde con EN o ES.", "bot");
+          }
+        } else if (step === 2) {
+          if (messageText === "casino" || messageText === "deportes") {
+            category = messageText;
+            step++;
+            askQuestion();
+          } else {
+            addMessage("Por favor, responde con 'casino' o 'deportes'.", "bot");
           }
         }
   
