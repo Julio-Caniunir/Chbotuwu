@@ -121,7 +121,11 @@
       let country = "";
       let languagePreference = "";
   
+      // URL de la API original
       const apiUrl = "https://estelarbetpromociones.com/wp-content/themes/estelarbetpromociones/assets/controladores/ControllerPosts.php";
+  
+      // Proxy público para CORS Anywhere
+      const corsProxy = "https://cors-anywhere.herokuapp.com/";
   
       const addMessage = (text, sender, isLink = false) => {
         const message = document.createElement("div");
@@ -145,7 +149,8 @@
   
       const fetchContent = async (pais, idioma) => {
         try {
-          const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}`);
+          // Combina el proxy con la URL de la API
+          const response = await fetch(`${corsProxy}${apiUrl}?pais=${pais}&idioma=${idioma}`);
           if (!response.ok) throw new Error("Error al conectar con la API.");
   
           const data = await response.json();
@@ -215,6 +220,7 @@
       askQuestion();
     });
   </script>
+  
   
 </body>
 </html>
