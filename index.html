@@ -120,130 +120,158 @@
     </div>
   </div>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const chatMessages = document.getElementById("chatMessages");
-      const messageInput = document.getElementById("messageInput");
-      const sendButton = document.getElementById("sendButton");
+   document.addEventListener("DOMContentLoaded", () => {
+  const chatMessages = document.getElementById("chatMessages");
+  const messageInput = document.getElementById("messageInput");
+  const sendButton = document.getElementById("sendButton");
 
-      let step = 0; // Controla las preguntas
-      let country = ""; // Guardará el país ingresado
-      let languagePreference = ""; // Guardará el idioma ingresado
-      let category = ""; // Guardará la categoría ingresada
+  let step = 0; // Controla las preguntas
+  let country = ""; // Guardará el país ingresado
+  let languagePreference = ""; // Guardará el idioma ingresado
+  let category = ""; // Guardará la categoría ingresada
 
-      const apiUrl = "/api"; // Endpoint de la función serverless
+  const apiUrl = "/api"; // Endpoint de la función serverless
 
-      const addMessage = (text, sender, isLink = false) => {
-        const message = document.createElement("div");
-        message.classList.add("message", sender);
+  const messages = {
+    es: {
+      greeting: "¡Hola! ¿De qué país eres? (Ejemplo: CL, PE)",
+      language: "¿Prefieres la información en Inglés o Español? (EN/ES)",
+      category: "¿Qué categoría prefieres? (casino/deportes)",
+      fetching: "Buscando promociones, por favor espera...",
+      invalidCountry: "Por favor, ingresa un código de país válido (Ejemplo: CL, PE).",
+      invalidLanguage: "Por favor, responde con EN o ES.",
+      invalidCategory: "Por favor, responde con 'casino' o 'deportes'.",
+      noPromotions: "No se encontraron promociones para la categoría seleccionada.",
+      error: "Hubo un error al obtener las promociones. Por favor, intenta más tarde.",
+    },
+    en: {
+      greeting: "Hello! What country are you from? (Example: CL, PE)",
+      language: "Do you prefer information in English or Spanish? (EN/ES)",
+      category: "What category do you prefer? (casino/sports)",
+      fetching: "Searching for promotions, please wait...",
+      invalidCountry: "Please enter a valid country code (Example: CL, PE).",
+      invalidLanguage: "Please respond with EN or ES.",
+      invalidCategory: "Please respond with 'casino' or 'sports'.",
+      noPromotions: "No promotions were found for the selected category.",
+      error: "An error occurred while fetching promotions. Please try again later.",
+    },
+  };
 
-        if (isLink) {
-          const link = document.createElement("a");
-          link.href = text.url;
-          link.textContent = text.title;
-          link.target = "_blank"; // Abrir en nueva pestaña
-          link.style.color = sender === "bot" ? "black" : "white"; // Ajusta el color según el remitente
-          message.appendChild(link);
-        } else {
-          message.textContent = text;
-        }
+  const addMessage = (text, sender, isLink = false) => {
+    const message = document.createElement("div");
+    message.classList.add("message", sender);
 
-        chatMessages.appendChild(message);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      };
+    if (isLink) {
+      const link = document.createElement("a");
+      link.href = text.url;
+      link.textContent = text.title;
+      link.target = "_blank"; // Abrir en nueva pestaña
+      link.style.color = sender === "bot" ? "black" : "white"; // Ajusta el color según el remitente
+      message.appendChild(link);
+    } else {
+      message.textContent = text;
+    }
 
-      const fetchContent = async (pais, idioma, categoria) => {
-        addMessage(`Consultando promociones para ${categoria}...`, "bot"); // Mensaje al usuario
+    chatMessages.appendChild(message);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  };
 
-        try {
-          const response = await fetch(
-            `${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`
-          );
+  const fetchContent = async (pais, idioma, categoria) => {
+    addMessage(messages[idioma.toLowerCase()].fetching, "bot"); // Mensaje al usuario
 
-          if (!response.ok) throw new Error(`Error ${response.status}: No se pudo conectar con la API.`);
+    try {
+      const response = await fetch(
+        `${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`
+      );
 
-          const data = await response.json();
-          console.log("Datos recibidos de la API:", data); // Depuración en consola
+      if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
 
-          displayPromotions(data);
-        } catch (error) {
-          console.error("Error al obtener datos de la API:", error);
-          addMessage("Hubo un error al obtener las promociones. Por favor, intenta más tarde.", "bot");
-        }
-      };
+      const data = await response.json();
+      console.log("Datos recibidos de la API:", data); // Depuración en consola
 
-      const displayPromotions = (data) => {
-        console.log("Datos completos recibidos:", data);
+      displayPromotions(data, idioma);
+    } catch (error) {
+      console.error("Error al obtener datos de la API:", error);
+      addMessage(messages[idioma.toLowerCase()].error, "bot");
+    }
+  };
 
-        if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
-          data.api1.data.forEach((item) => {
-            addMessage({ title: item.title, url: item.url }, "bot", true);
-          });
-        } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
-          data.api2.data.forEach((item) => {
-            addMessage({ title: item.title, url: item.url }, "bot", true);
-          });
-        } else {
-          addMessage("No se encontraron promociones para la categoría seleccionada.", "bot");
-        }
-      };
+  const displayPromotions = (data, idioma) => {
+    console.log("Datos completos recibidos:", data);
 
-      const askQuestion = () => {
-        if (step === 0) {
-          addMessage("¡Hola! ¿De qué país eres? (Ejemplo: CL, PE)", "bot");
-        } else if (step === 1) {
-          addMessage("¿Prefieres la información en Inglés o Español? (EN/ES)", "bot");
-        } else if (step === 2) {
-          addMessage("¿Qué categoría prefieres? (casino/deportes)", "bot");
-        } else if (step === 3) {
-          addMessage("Buscando promociones, por favor espera...", "bot");
-          fetchContent(country, languagePreference, category);
-        }
-      };
-
-      sendButton.addEventListener("click", () => {
-        const messageText = messageInput.value.trim().toLowerCase();
-        if (!messageText) return;
-
-        addMessage(messageText, "user");
-
-        if (step === 0) {
-          if (messageText.match(/^[a-z]{2}$/i)) {
-            country = messageText.toUpperCase();
-            step++;
-            askQuestion();
-          } else {
-            addMessage("Por favor, ingresa un código de país válido (Ejemplo: CL, PE).", "bot");
-          }
-        } else if (step === 1) {
-          if (messageText === "en" || messageText === "es") {
-            languagePreference = messageText.toUpperCase();
-            step++;
-            askQuestion();
-          } else {
-            addMessage("Por favor, responde con EN o ES.", "bot");
-          }
-        } else if (step === 2) {
-          if (messageText === "casino" || messageText === "deportes") {
-            category = messageText;
-            step++;
-            askQuestion();
-          } else {
-            addMessage("Por favor, responde con 'casino' o 'deportes'.", "bot");
-          }
-        }
-
-        messageInput.value = ""; // Limpiar el campo de entrada
+    if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
+      data.api1.data.forEach((item) => {
+        addMessage({ title: item.title, url: item.url }, "bot", true);
       });
-
-      messageInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          sendButton.click();
-        }
+    } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
+      data.api2.data.forEach((item) => {
+        addMessage({ title: item.title, url: item.url }, "bot", true);
       });
+    } else {
+      addMessage(messages[idioma.toLowerCase()].noPromotions, "bot");
+    }
+  };
 
-      // Inicia la conversación
-      askQuestion();
-    });
+  const askQuestion = () => {
+    const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+
+    if (step === 0) {
+      addMessage(currentMessages.greeting, "bot");
+    } else if (step === 1) {
+      addMessage(currentMessages.language, "bot");
+    } else if (step === 2) {
+      addMessage(currentMessages.category, "bot");
+    } else if (step === 3) {
+      fetchContent(country, languagePreference, category);
+    }
+  };
+
+  sendButton.addEventListener("click", () => {
+    const messageText = messageInput.value.trim().toLowerCase();
+    if (!messageText) return;
+
+    addMessage(messageText, "user");
+
+    const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+
+    if (step === 0) {
+      if (messageText.match(/^[a-z]{2}$/i)) {
+        country = messageText.toUpperCase();
+        step++;
+        askQuestion();
+      } else {
+        addMessage(currentMessages.invalidCountry, "bot");
+      }
+    } else if (step === 1) {
+      if (messageText === "en" || messageText === "es") {
+        languagePreference = messageText.toUpperCase();
+        step++;
+        askQuestion();
+      } else {
+        addMessage(currentMessages.invalidLanguage, "bot");
+      }
+    } else if (step === 2) {
+      if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
+        category = messageText === "sports" ? "deportes" : messageText; // Map 'sports' to 'deportes'
+        step++;
+        askQuestion();
+      } else {
+        addMessage(currentMessages.invalidCategory, "bot");
+      }
+    }
+
+    messageInput.value = ""; // Limpiar el campo de entrada
+  });
+
+  messageInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      sendButton.click();
+    }
+  });
+
+  // Inicia la conversación
+  askQuestion();
+});
   </script>
 
 
