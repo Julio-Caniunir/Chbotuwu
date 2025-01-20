@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,11 +16,14 @@
       height: 100vh;
       background-color: #f4f4f4;
     }
-  
+
     .chat-container {
-      width: 300px; /* Tamaño reducido */
-      max-width: 90%; /* Adaptable a pantallas pequeñas */
-      height: 500px; /* Altura específica */
+      width: 300px;
+      /* Tamaño reducido */
+      max-width: 90%;
+      /* Adaptable a pantallas pequeñas */
+      height: 500px;
+      /* Altura específica */
       background-color: #fff;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
@@ -27,52 +31,55 @@
       display: flex;
       flex-direction: column;
     }
-  
+
     .chat-header {
       background-color: #007bff;
       color: white;
       padding: 10px 15px;
       text-align: center;
-      font-size: 18px; /* Tamaño de fuente más pequeño */
+      font-size: 18px;
+      /* Tamaño de fuente más pequeño */
       font-weight: bold;
     }
-  
+
     .chat-messages {
       flex: 1;
       padding: 10px;
-      overflow-y: auto; /* Habilita el scroll interno */
+      overflow-y: auto;
+      /* Habilita el scroll interno */
       background-color: #f9f9f9;
     }
-  
+
     .chat-messages .message {
       margin-bottom: 10px;
       padding: 8px;
       border-radius: 8px;
       max-width: 80%;
       word-wrap: break-word;
-      font-size: 14px; /* Tamaño de texto ajustado */
+      font-size: 14px;
+      /* Tamaño de texto ajustado */
       line-height: 1.4;
     }
-  
+
     .chat-messages .message.user {
       background-color: #007bff;
       color: white;
       align-self: flex-end;
     }
-  
+
     .chat-messages .message.bot {
       background-color: #e0e0e0;
       color: black;
       align-self: flex-start;
     }
-  
+
     .chat-input {
       display: flex;
       padding: 10px;
       border-top: 1px solid #ddd;
       background-color: #fff;
     }
-  
+
     .chat-input input {
       flex: 1;
       padding: 10px;
@@ -81,7 +88,7 @@
       outline: none;
       font-size: 14px;
     }
-  
+
     .chat-input button {
       margin-left: 10px;
       padding: 10px 15px;
@@ -92,12 +99,13 @@
       cursor: pointer;
       font-size: 14px;
     }
-  
+
     .chat-input button:hover {
       background-color: #0056b3;
     }
   </style>
 </head>
+
 <body>
   <div class="chat-container">
     <div class="chat-header">
@@ -116,18 +124,18 @@
       const chatMessages = document.getElementById("chatMessages");
       const messageInput = document.getElementById("messageInput");
       const sendButton = document.getElementById("sendButton");
-  
+
       let step = 0; // Controla las preguntas
       let country = ""; // Guardará el país ingresado
       let languagePreference = ""; // Guardará el idioma ingresado
       let category = ""; // Guardará la categoría ingresada
-  
+
       const apiUrl = "/api"; // Endpoint de la función serverless
-  
+
       const addMessage = (text, sender, isLink = false) => {
         const message = document.createElement("div");
         message.classList.add("message", sender);
-  
+
         if (isLink) {
           const link = document.createElement("a");
           link.href = text.url;
@@ -138,12 +146,14 @@
         } else {
           message.textContent = text;
         }
-  
+
         chatMessages.appendChild(message);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       };
-  
+
       const fetchContent = async (pais, idioma, categoria) => {
+  addMessage(`Consultando promociones para ${categoria}...`, "bot"); // Mensaje al usuario
+
   try {
     const response = await fetch(
       `${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`
@@ -152,7 +162,7 @@
     if (!response.ok) throw new Error(`Error ${response.status}: No se pudo conectar con la API.`);
 
     const data = await response.json();
-    console.log("Datos recibidos de la API:", data); // Verifica la estructura en consola
+    console.log("Datos recibidos de la API:", data); // Depuración en consola
 
     displayPromotions(data);
   } catch (error) {
@@ -161,18 +171,18 @@
   }
 };
 
-const displayPromotions = (data) => {
-  if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-    console.log("Promociones disponibles:", data.data); // Depuración adicional
-    data.data.forEach((item) => {
-      addMessage({ title: item.title, url: item.url }, "bot", true);
-    });
-  } else {
-    console.log("Respuesta vacía o sin promociones:", data); // Depuración
-    addMessage("No se encontraron promociones para los datos ingresados.", "bot");
-  }
-};
-  
+      const displayPromotions = (data) => {
+        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+          console.log("Promociones disponibles:", data.data); // Depuración adicional
+          data.data.forEach((item) => {
+            addMessage({ title: item.title, url: item.url }, "bot", true);
+          });
+        } else {
+          console.log("Respuesta vacía o sin promociones:", data); // Depuración
+          addMessage("No se encontraron promociones para los datos ingresados.", "bot");
+        }
+      };
+
       const askQuestion = () => {
         if (step === 0) {
           addMessage("¡Hola! ¿De qué país eres? (Ejemplo: CL, PE)", "bot");
@@ -185,13 +195,13 @@ const displayPromotions = (data) => {
           fetchContent(country, languagePreference, category);
         }
       };
-  
+
       sendButton.addEventListener("click", () => {
         const messageText = messageInput.value.trim().toLowerCase();
         if (!messageText) return;
-  
+
         addMessage(messageText, "user");
-  
+
         if (step === 0) {
           if (messageText.match(/^[a-z]{2}$/i)) {
             country = messageText.toUpperCase();
@@ -217,22 +227,23 @@ const displayPromotions = (data) => {
             addMessage("Por favor, responde con 'casino' o 'deportes'.", "bot");
           }
         }
-  
+
         messageInput.value = ""; // Limpiar el campo de entrada
       });
-  
+
       messageInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           sendButton.click();
         }
       });
-  
+
       // Inicia la conversación
       askQuestion();
     });
   </script>
-  
-  
-  
+
+
+
 </body>
+
 </html>
