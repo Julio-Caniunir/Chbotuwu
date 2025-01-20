@@ -144,30 +144,34 @@
       };
   
       const fetchContent = async (pais, idioma, categoria) => {
-        try {
-          const response = await fetch(
-            `${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`
-          );
-  
-          if (!response.ok) throw new Error("Error al conectar con la función de Netlify.");
-  
-          const data = await response.json();
-          displayPromotions(data);
-        } catch (error) {
-          console.error(error);
-          addMessage("Hubo un error al obtener las promociones. Por favor, intenta más tarde.", "bot");
-        }
-      };
-  
-      const displayPromotions = (data) => {
-        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-          data.data.forEach((item) => {
-            addMessage({ title: item.title, url: item.url }, "bot", true);
-          });
-        } else {
-          addMessage("No se encontraron promociones para los datos ingresados.", "bot");
-        }
-      };
+  try {
+    const response = await fetch(
+      `${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`
+    );
+
+    if (!response.ok) throw new Error(`Error ${response.status}: No se pudo conectar con la API.`);
+
+    const data = await response.json();
+    console.log("Datos recibidos de la API:", data); // Verifica la estructura en consola
+
+    displayPromotions(data);
+  } catch (error) {
+    console.error("Error al obtener datos de la API:", error);
+    addMessage("Hubo un error al obtener las promociones. Por favor, intenta más tarde.", "bot");
+  }
+};
+
+const displayPromotions = (data) => {
+  if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+    console.log("Promociones disponibles:", data.data); // Depuración adicional
+    data.data.forEach((item) => {
+      addMessage({ title: item.title, url: item.url }, "bot", true);
+    });
+  } else {
+    console.log("Respuesta vacía o sin promociones:", data); // Depuración
+    addMessage("No se encontraron promociones para los datos ingresados.", "bot");
+  }
+};
   
       const askQuestion = () => {
         if (step === 0) {
