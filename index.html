@@ -74,6 +74,7 @@
         opacity: 0;
         transform: translateY(10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -85,6 +86,7 @@
         transform: translateX(50px);
         opacity: 0;
       }
+
       to {
         transform: translateX(0);
         opacity: 1;
@@ -152,26 +154,18 @@
 
       const messages = {
         es: {
-          greeting: "¡Hola! ¿De qué país eres? (Ejemplo: CL, PE)",
-          language: "¿Prefieres la información en Inglés o Español? (EN/ES)",
-          category: "¿Qué categoría prefieres? (casino/deportes)",
-          fetching: "Buscando promociones, por favor espera...",
-          invalidCountry: "Por favor, ingresa un código de país válido (Ejemplo: CL, PE).",
-          invalidLanguage: "Por favor, responde con EN o ES.",
-          invalidCategory: "Por favor, responde con 'casino' o 'deportes'.",
-          noPromotions: "No se encontraron promociones para la categoría seleccionada.",
-          error: "Hubo un error al obtener las promociones. Por favor, intenta más tarde.",
+          greeting: "¡Hola! 🌟 ¿De qué país eres? (Ejemplo: CL, PE)",
+          language: "¿Prefieres la información en Inglés 🇬🇧 o Español 🇪🇸? (EN/ES)",
+          category: "¿Qué categoría prefieres? Casino 🎲 o Deportes ⚽",
+          fetching: "Estoy buscando promociones para ti... ⏳",
+          noPromotions: "Lo siento, no encontré promociones para esa categoría 😢.",
         },
         en: {
-          greeting: "Hello! What country are you from? (Example: CL, PE)",
-          language: "Do you prefer information in English or Spanish? (EN/ES)",
-          category: "What category do you prefer? (casino/sports)",
-          fetching: "Searching for promotions, please wait...",
-          invalidCountry: "Please enter a valid country code (Example: CL, PE).",
-          invalidLanguage: "Please respond with EN or ES.",
-          invalidCategory: "Please respond with 'casino' or 'sports'.",
-          noPromotions: "No promotions were found for the selected category.",
-          error: "An error occurred while fetching promotions. Please try again later.",
+          greeting: "Hello! 🌍 What country are you from? (Example: CL, PE)",
+          language: "Do you prefer information in English 🇬🇧 or Spanish 🇪🇸? (EN/ES)",
+          category: "What category do you prefer? Casino 🎲 or Sports ⚽",
+          fetching: "Searching for promotions... ⏳",
+          noPromotions: "Sorry, no promotions found for that category 😢.",
         },
       };
 
@@ -206,7 +200,10 @@
           callback();
         }, delay);
       };
-
+      simulateTyping(() => {
+        addMessage("Buscando promociones... Oh, espera, cometí un error 🙈. ¡Déjame intentarlo de nuevo!", "bot");
+        setTimeout(() => fetchContent(country, languagePreference, category), 2000);
+      }, 1500);
       const fetchContent = async (pais, idioma, categoria) => {
         simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
 
@@ -285,6 +282,18 @@
           } else {
             simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
           }
+        }
+        if (step === 0 && !messageText.match(/^[a-z]{2}$/i)) {
+          simulateTyping(() => {
+            addMessage(
+              "No entiendo el país que mencionas 🤔. Por favor, usa un código de dos letras como CL o PE.",
+              "bot"
+            );
+          }, 1500);
+        } else if (step === 1 && messageText !== "en" && messageText !== "es") {
+          simulateTyping(() => {
+            addMessage("Hmm... no entendí el idioma. ¿Podrías responder con EN o ES? 😊", "bot");
+          }, 1500);
         }
 
         messageInput.value = "";
