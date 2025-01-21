@@ -260,53 +260,53 @@ const fetchContent = async (pais, idioma, categoria) => {
       };
 
       sendButton.addEventListener("click", () => {
-        const messageText = messageInput.value.trim().toLowerCase();
-        if (!messageText) return;
+  const messageText = messageInput.value.trim().toLowerCase();
+  if (!messageText) return; // No procesar si el mensaje está vacío
 
-        addMessage(messageText, "user");
+  addMessage(messageText, "user");
 
-        const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+  const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
 
-        if (step === 0) {
-          if (messageText.match(/^[a-z]{2}$/i)) {
-            country = messageText.toUpperCase();
-            step++;
-            askQuestion();
-          } else {
-            simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
-          }
-        } else if (step === 1) {
-          if (messageText === "en" || messageText === "es") {
-            languagePreference = messageText.toUpperCase();
-            step++;
-            askQuestion();
-          } else {
-            simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
-          }
-        } else if (step === 2) {
-          if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
-            category = messageText === "sports" ? "deportes" : messageText;
-            step++;
-            askQuestion();
-          } else {
-            simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
-          }
-        }
-        if (step === 0 && !messageText.match(/^[a-z]{2}$/i)) {
-          simulateTyping(() => {
-            addMessage(
-              "No entiendo el país que mencionas 🤔. Por favor, usa un código de dos letras como CL o PE.",
-              "bot"
-            );
-          }, 1500);
-        } else if (step === 1 && messageText !== "en" && messageText !== "es") {
-          simulateTyping(() => {
-            addMessage("Hmm... no entendí el idioma. ¿Podrías responder con EN o ES? 😊", "bot");
-          }, 1500);
-        }
+  // Manejo de pasos
+  if (step === 0) {
+    if (messageText.match(/^[a-z]{2}$/i)) {
+      country = messageText.toUpperCase();
+      step++;
+      askQuestion();
+    } else {
+      simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
+      simulateTyping(() => {
+        addMessage(
+          "No entiendo el país que mencionas 🤔. Por favor, usa un código de dos letras como CL o PE.",
+          "bot"
+        );
+      }, 1500);
+    }
+  } else if (step === 1) {
+    if (messageText === "en" || messageText === "es") {
+      languagePreference = messageText.toUpperCase();
+      step++;
+      askQuestion();
+    } else {
+      simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
+      simulateTyping(() => {
+        addMessage("Hmm... no entendí el idioma. ¿Podrías responder con EN o ES? 😊", "bot");
+      }, 1500);
+    }
+  } else if (step === 2) {
+    if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
+      category = messageText === "sports" ? "deportes" : messageText;
+      step++;
+      askQuestion();
+    } else {
+      simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
+    }
+  }
 
-        messageInput.value = "";
-      });
+  // Limpiar el campo de entrada
+  messageInput.value = "";
+});
+
 
       messageInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
