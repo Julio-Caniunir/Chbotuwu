@@ -87,10 +87,13 @@
     }
 
     .chat-messages .promotion-card a {
-      color: #0056b3;
+      color: #f5faff;
       text-decoration: none;
       font-size: 14px;
       font-weight: bold;
+      background: #007bff;
+      padding: 4px;
+      border-radius: 6px;
     }
 
     .chat-messages .promotion-card a:hover {
@@ -154,43 +157,43 @@
 
 
     .chat-toggle {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  font-size: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
 
-.chat-toggle:hover {
-  background-color: #0056b3;
-}
+    .chat-toggle:hover {
+      background-color: #0056b3;
+    }
 
-.chat-container {
-  position: fixed;
-  bottom: 100px;
-  right: 20px;
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  transform: scale(0);
-  opacity: 0;
-  visibility: hidden;
-}
+    .chat-container {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+      transform: scale(0);
+      opacity: 0;
+      visibility: hidden;
+    }
 
-.chat-container.open {
-  transform: scale(1);
-  opacity: 1;
-  visibility: visible;
-}
+    .chat-container.open {
+      transform: scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
   </style>
 </head>
 
@@ -211,11 +214,11 @@
   </div>
   <script>
     const chatToggle = document.getElementById("chatToggle");
-const chatContainer = document.querySelector(".chat-container");
+    const chatContainer = document.querySelector(".chat-container");
 
-chatToggle.addEventListener("click", () => {
-  chatContainer.classList.toggle("open");
-});
+    chatToggle.addEventListener("click", () => {
+      chatContainer.classList.toggle("open");
+    });
     document.addEventListener("DOMContentLoaded", () => {
       const chatMessages = document.getElementById("chatMessages");
       const messageInput = document.getElementById("messageInput");
