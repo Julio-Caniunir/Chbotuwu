@@ -187,40 +187,49 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       };
 
-      const simulateTyping = (callback, delay = 1000) => {
-        const typingIndicator = document.createElement("div");
-        typingIndicator.classList.add("message", "bot");
-        typingIndicator.textContent = "Escribiendo...";
-        typingIndicator.id = "typingIndicator";
-        chatMessages.appendChild(typingIndicator);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Función para simular que el bot está escribiendo
+const simulateTyping = (callback, delay = 1000) => {
+  const typingIndicator = document.createElement("div");
+  typingIndicator.classList.add("message", "bot");
+  typingIndicator.textContent = "Escribiendo...";
+  typingIndicator.id = "typingIndicator";
+  chatMessages.appendChild(typingIndicator);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        setTimeout(() => {
-          typingIndicator.remove();
-          callback();
-        }, delay);
-      };
-      simulateTyping(() => {
-        addMessage("Buscando promociones... Oh, espera, cometí un error 🙈. ¡Déjame intentarlo de nuevo!", "bot");
-        setTimeout(() => fetchContent(country, languagePreference, category), 2000);
-      }, 1500);
-      const fetchContent = async (pais, idioma, categoria) => {
-        simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
+  setTimeout(() => {
+    typingIndicator.remove();
+    callback();
+  }, delay);
+};
 
-        try {
-          const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
+// Función para buscar promociones con simulación de errores y reintentos
+const fetchContent = async (pais, idioma, categoria) => {
+  simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
 
-          if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
+  try {
+    const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
 
-          const data = await response.json();
-          console.log("Datos recibidos de la API:", data);
+    if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
 
-          displayPromotions(data, idioma);
-        } catch (error) {
-          console.error("Error al obtener datos de la API:", error);
-          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
-        }
-      };
+    const data = await response.json();
+    console.log("Datos recibidos de la API:", data);
+
+    displayPromotions(data, idioma);
+  } catch (error) {
+    console.error("Error al obtener datos de la API:", error);
+
+    // Simulación de error y reintento
+    simulateTyping(() => {
+      addMessage(
+        "Buscando promociones... Oh, espera, cometí un error 🙈. ¡Déjame intentarlo de nuevo!",
+        "bot"
+      );
+
+      setTimeout(() => fetchContent(pais, idioma, categoria), 2000);
+    }, 1500);
+  }
+};
+
 
       const displayPromotions = (data, idioma) => {
         if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
