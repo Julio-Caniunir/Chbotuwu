@@ -157,14 +157,12 @@
           greeting: "¡Hola! 🌟 ¿De qué país eres? (Ejemplo: CL, PE)",
           language: "¿Prefieres la información en Inglés 🇬🇧 o Español 🇪🇸? (EN/ES)",
           category: "¿Qué categoría prefieres? Casino 🎲 o Deportes ⚽",
-          fetching: "Estoy buscando promociones para ti... ⏳",
           noPromotions: "Lo siento, no encontré promociones para esa categoría 😢.",
         },
         en: {
           greeting: "Hello! 🌍 What country are you from? (Example: CL, PE)",
           language: "Do you prefer information in English 🇬🇧 or Spanish 🇪🇸? (EN/ES)",
           category: "What category do you prefer? Casino 🎲 or Sports ⚽",
-          fetching: "Searching for promotions... ⏳",
           noPromotions: "Sorry, no promotions found for that category 😢.",
         },
       };
@@ -204,53 +202,53 @@
 
       // Función para buscar promociones con simulación de errores y reintentos
       const fetchContent = async (pais, idioma, categoria) => {
-  const fetchingMessage = messages[idioma.toLowerCase()].fetching;
+        const fetchingMessage = messages[idioma.toLowerCase()].fetching;
 
-  // Simula "Escribiendo..." y muestra el mensaje "Buscando promociones"
-  simulateTyping(() => addMessage(fetchingMessage, "bot"));
+        // Simula "Escribiendo..." y muestra el mensaje "Buscando promociones"
+        simulateTyping(() => addMessage(fetchingMessage, "bot"));
 
-  try {
-    const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
+        try {
+          const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
 
-    if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
+          if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
 
-    const data = await response.json();
-    console.log("Datos recibidos de la API:", data);
+          const data = await response.json();
+          console.log("Datos recibidos de la API:", data);
 
-    // Elimina el mensaje "Buscando promociones" antes de mostrar resultados
-    removeLastMessage(fetchingMessage);
+          // Elimina el mensaje "Buscando promociones" antes de mostrar resultados
+          removeLastMessage(fetchingMessage);
 
-    displayPromotions(data, idioma);
-  } catch (error) {
-    console.error("Error al obtener datos de la API:", error);
+          displayPromotions(data, idioma);
+        } catch (error) {
+          console.error("Error al obtener datos de la API:", error);
 
-    // Elimina el mensaje "Buscando promociones" en caso de error
-    removeLastMessage(fetchingMessage);
+          // Elimina el mensaje "Buscando promociones" en caso de error
+          removeLastMessage(fetchingMessage);
 
-    simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
-  }
-};
+          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
+        }
+      };
 
-// Función para eliminar el último mensaje específico
-const removeLastMessage = (messageText) => {
-  const messages = document.querySelectorAll(".chat-messages .message.bot");
-  const lastMessage = Array.from(messages).find((msg) => msg.textContent === messageText);
-  if (lastMessage) lastMessage.remove();
-};
+      // Función para eliminar el último mensaje específico
+      const removeLastMessage = (messageText) => {
+        const messages = document.querySelectorAll(".chat-messages .message.bot");
+        const lastMessage = Array.from(messages).find((msg) => msg.textContent === messageText);
+        if (lastMessage) lastMessage.remove();
+      };
 
-const displayPromotions = (data, idioma) => {
-  if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
-    data.api1.data.forEach((item) => {
-      addMessage({ title: item.title, url: item.url }, "bot", true);
-    });
-  } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
-    data.api2.data.forEach((item) => {
-      addMessage({ title: item.title, url: item.url }, "bot", true);
-    });
-  } else {
-    simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
-  }
-};
+      const displayPromotions = (data, idioma) => {
+        if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
+          data.api1.data.forEach((item) => {
+            addMessage({ title: item.title, url: item.url }, "bot", true);
+          });
+        } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
+          data.api2.data.forEach((item) => {
+            addMessage({ title: item.title, url: item.url }, "bot", true);
+          });
+        } else {
+          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
+        }
+      };
 
 
       const askQuestion = () => {
