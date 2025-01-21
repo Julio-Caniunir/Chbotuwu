@@ -74,7 +74,6 @@
         opacity: 0;
         transform: translateY(10px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
@@ -86,7 +85,6 @@
         transform: translateX(50px);
         opacity: 0;
       }
-
       to {
         transform: translateX(0);
         opacity: 1;
@@ -153,21 +151,21 @@
       const apiUrl = "/api";
 
       const messages = {
-        es: {
-          greeting: "¡Hola! 🌟 ¿De qué país eres? (Ejemplo: CL, PE)",
-          language: "¿Prefieres la información en Inglés 🇬🇧 o Español 🇪🇸? (EN/ES)",
-          category: "¿Qué categoría prefieres? Casino 🎲 o Deportes ⚽",
-          fetching: "Estoy buscando promociones para ti... ⏳",
-          noPromotions: "Lo siento, no encontré promociones para esa categoría 😢.",
-        },
-        en: {
-          greeting: "Hello! 🌍 What country are you from? (Example: CL, PE)",
-          language: "Do you prefer information in English 🇬🇧 or Spanish 🇪🇸? (EN/ES)",
-          category: "What category do you prefer? Casino 🎲 or Sports ⚽",
-          fetching: "Searching for promotions... ⏳",
-          noPromotions: "Sorry, no promotions found for that category 😢.",
-        },
-      };
+  es: {
+    greeting: "¡Hola! 🌟 ¿De qué país eres? (Ejemplo: CL, PE)",
+    language: "¿Prefieres la información en Inglés 🇬🇧 o Español 🇪🇸? (EN/ES)",
+    category: "¿Qué categoría prefieres? Casino 🎲 o Deportes ⚽",
+    fetching: "Estoy buscando promociones para ti... ⏳",
+    noPromotions: "Lo siento, no encontré promociones para esa categoría 😢.",
+  },
+  en: {
+    greeting: "Hello! 🌍 What country are you from? (Example: CL, PE)",
+    language: "Do you prefer information in English 🇬🇧 or Spanish 🇪🇸? (EN/ES)",
+    category: "What category do you prefer? Casino 🎲 or Sports ⚽",
+    fetching: "Searching for promotions... ⏳",
+    noPromotions: "Sorry, no promotions found for that category 😢.",
+  },
+};
 
       const addMessage = (text, sender, isLink = false) => {
         const message = document.createElement("div");
@@ -187,7 +185,6 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       };
 
-      // Función para simular que el bot está escribiendo
       const simulateTyping = (callback, delay = 1000) => {
         const typingIndicator = document.createElement("div");
         typingIndicator.classList.add("message", "bot");
@@ -202,7 +199,6 @@
         }, delay);
       };
 
-      // Función para buscar promociones con simulación de errores y reintentos
       const fetchContent = async (pais, idioma, categoria) => {
         simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
 
@@ -217,10 +213,9 @@
           displayPromotions(data, idioma);
         } catch (error) {
           console.error("Error al obtener datos de la API:", error);
-
+          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
         }
       };
-
 
       const displayPromotions = (data, idioma) => {
         if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
@@ -252,13 +247,12 @@
 
       sendButton.addEventListener("click", () => {
         const messageText = messageInput.value.trim().toLowerCase();
-        if (!messageText) return; // No procesar si el mensaje está vacío
+        if (!messageText) return;
 
         addMessage(messageText, "user");
 
         const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
 
-        // Manejo de pasos
         if (step === 0) {
           if (messageText.match(/^[a-z]{2}$/i)) {
             country = messageText.toUpperCase();
@@ -266,12 +260,6 @@
             askQuestion();
           } else {
             simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
-            simulateTyping(() => {
-              addMessage(
-                "No entiendo el país que mencionas 🤔. Por favor, usa un código de dos letras como CL o PE.",
-                "bot"
-              );
-            }, 1500);
           }
         } else if (step === 1) {
           if (messageText === "en" || messageText === "es") {
@@ -280,9 +268,6 @@
             askQuestion();
           } else {
             simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
-            simulateTyping(() => {
-              addMessage("Hmm... no entendí el idioma. ¿Podrías responder con EN o ES? 😊", "bot");
-            }, 1500);
           }
         } else if (step === 2) {
           if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
@@ -294,10 +279,8 @@
           }
         }
 
-        // Limpiar el campo de entrada
         messageInput.value = "";
       });
-
 
       messageInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
