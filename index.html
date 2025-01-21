@@ -157,35 +157,35 @@
           greeting: "¡Hola! 🌟 ¿De qué país eres? (Ejemplo: CL, PE)",
           language: "¿Prefieres la información en Inglés 🇬🇧 o Español 🇪🇸? (EN/ES)",
           category: "¿Qué categoría prefieres? Casino 🎲 o Deportes ⚽",
+          fetching: "Estoy buscando promociones para ti... ⏳",
           noPromotions: "Lo siento, no encontré promociones para esa categoría 😢.",
         },
         en: {
           greeting: "Hello! 🌍 What country are you from? (Example: CL, PE)",
           language: "Do you prefer information in English 🇬🇧 or Spanish 🇪🇸? (EN/ES)",
           category: "What category do you prefer? Casino 🎲 or Sports ⚽",
+          fetching: "Searching for promotions... ⏳",
           noPromotions: "Sorry, no promotions found for that category 😢.",
         },
       };
 
       const addMessage = (text, sender, isLink = false) => {
-  if (!text || text.trim() === "") return; // Verifica si el texto no está vacío
+        const message = document.createElement("div");
+        message.classList.add("message", sender);
 
-  const message = document.createElement("div");
-  message.classList.add("message", sender);
+        if (isLink) {
+          const link = document.createElement("a");
+          link.href = text.url;
+          link.textContent = text.title;
+          link.target = "_blank";
+          message.appendChild(link);
+        } else {
+          message.textContent = text;
+        }
 
-  if (isLink) {
-    const link = document.createElement("a");
-    link.href = text.url;
-    link.textContent = text.title;
-    link.target = "_blank";
-    message.appendChild(link);
-  } else {
-    message.textContent = text;
-  }
-
-  chatMessages.appendChild(message);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-};
+        chatMessages.appendChild(message);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      };
 
       // Función para simular que el bot está escribiendo
       const simulateTyping = (callback, delay = 1000) => {
@@ -204,10 +204,7 @@
 
       // Función para buscar promociones con simulación de errores y reintentos
       const fetchContent = async (pais, idioma, categoria) => {
-        const fetchingMessage = messages[idioma.toLowerCase()].fetching;
-
-        // Simula "Escribiendo..." y muestra el mensaje "Buscando promociones"
-        simulateTyping(() => addMessage(fetchingMessage, "bot"));
+        simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
 
         try {
           const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
@@ -217,26 +214,13 @@
           const data = await response.json();
           console.log("Datos recibidos de la API:", data);
 
-          // Elimina el mensaje "Buscando promociones" antes de mostrar resultados
-          removeLastMessage(fetchingMessage);
-
           displayPromotions(data, idioma);
         } catch (error) {
           console.error("Error al obtener datos de la API:", error);
 
-          // Elimina el mensaje "Buscando promociones" en caso de error
-          removeLastMessage(fetchingMessage);
-
-          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
         }
       };
 
-      // Función para eliminar el último mensaje específico
-      const removeLastMessage = (messageText) => {
-        const messages = document.querySelectorAll(".chat-messages .message.bot");
-        const lastMessage = Array.from(messages).find((msg) => msg.textContent === messageText);
-        if (lastMessage) lastMessage.remove();
-      };
 
       const displayPromotions = (data, idioma) => {
         if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
@@ -251,7 +235,6 @@
           simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
         }
       };
-
 
       const askQuestion = () => {
         const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
