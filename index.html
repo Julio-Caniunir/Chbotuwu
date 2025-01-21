@@ -76,7 +76,7 @@
       padding: 10px;
       margin-bottom: 10px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      text-align: left;
+      text-align: center;
       max-width: 90%;
     }
 
@@ -168,176 +168,176 @@
     </div>
   </div>
   <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const chatMessages = document.getElementById("chatMessages");
-  const messageInput = document.getElementById("messageInput");
-  const sendButton = document.getElementById("sendButton");
+    document.addEventListener("DOMContentLoaded", () => {
+      const chatMessages = document.getElementById("chatMessages");
+      const messageInput = document.getElementById("messageInput");
+      const sendButton = document.getElementById("sendButton");
 
-  let step = 0;
-  let country = "";
-  let languagePreference = "";
-  let category = "";
+      let step = 0;
+      let country = "";
+      let languagePreference = "";
+      let category = "";
 
-  const apiUrl = "/api";
+      const apiUrl = "/api";
 
-  const messages = {
-    es: {
-      greeting: "¡Hola! 🌟 ¿De qué país eres? (Ejemplo: CL, PE)",
-      language: "¿Prefieres la información en Inglés 🇬🇧 o Español 🇪🇸? (EN/ES)",
-      category: "¿Qué categoría prefieres? Casino 🎲 o Deportes ⚽",
-      fetching: "Estoy buscando promociones para ti... ⏳",
-      noPromotions: "Lo siento, no encontré promociones para esa categoría 😢.",
-    },
-    en: {
-      greeting: "Hello! 🌍 What country are you from? (Example: CL, PE)",
-      language: "Do you prefer information in English 🇬🇧 or Spanish 🇪🇸? (EN/ES)",
-      category: "What category do you prefer? Casino 🎲 or Sports ⚽",
-      fetching: "Searching for promotions... ⏳",
-      noPromotions: "Sorry, no promotions found for that category 😢.",
-    },
-  };
+      const messages = {
+        es: {
+          greeting: "¡Hola! 🌟 ¿De qué país eres? (Ejemplo: CL, PE)",
+          language: "¿Prefieres la información en Inglés 🇬🇧 o Español 🇪🇸? (EN/ES)",
+          category: "¿Qué categoría prefieres? Casino 🎲 o Deportes ⚽",
+          fetching: "Estoy buscando promociones para ti... ⏳",
+          noPromotions: "Lo siento, no encontré promociones para esa categoría 😢.",
+        },
+        en: {
+          greeting: "Hello! 🌍 What country are you from? (Example: CL, PE)",
+          language: "Do you prefer information in English 🇬🇧 or Spanish 🇪🇸? (EN/ES)",
+          category: "What category do you prefer? Casino 🎲 or Sports ⚽",
+          fetching: "Searching for promotions... ⏳",
+          noPromotions: "Sorry, no promotions found for that category 😢.",
+        },
+      };
 
-  const addMessage = (text, sender, isLink = false) => {
-    const message = document.createElement("div");
-    message.classList.add("message", sender);
+      const addMessage = (text, sender, isLink = false) => {
+        const message = document.createElement("div");
+        message.classList.add("message", sender);
 
-    if (isLink) {
-      const link = document.createElement("a");
-      link.href = text.url;
-      link.textContent = text.title;
-      link.target = "_blank";
-      message.appendChild(link);
-    } else {
-      message.textContent = text;
-    }
+        if (isLink) {
+          const link = document.createElement("a");
+          link.href = text.url;
+          link.textContent = text.title;
+          link.target = "_blank";
+          message.appendChild(link);
+        } else {
+          message.textContent = text;
+        }
 
-    chatMessages.appendChild(message);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  };
+        chatMessages.appendChild(message);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      };
 
-  const simulateTyping = (callback, delay = 1000) => {
-    const typingIndicator = document.createElement("div");
-    typingIndicator.classList.add("message", "bot");
-    typingIndicator.textContent = "Escribiendo...";
-    typingIndicator.id = "typingIndicator";
-    chatMessages.appendChild(typingIndicator);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+      const simulateTyping = (callback, delay = 1000) => {
+        const typingIndicator = document.createElement("div");
+        typingIndicator.classList.add("message", "bot");
+        typingIndicator.textContent = "Escribiendo...";
+        typingIndicator.id = "typingIndicator";
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    setTimeout(() => {
-      typingIndicator.remove();
-      callback();
-    }, delay);
-  };
+        setTimeout(() => {
+          typingIndicator.remove();
+          callback();
+        }, delay);
+      };
 
-  const addPromotionCard = (title, url) => {
-    const card = document.createElement("div");
-    card.classList.add("promotion-card");
+      const addPromotionCard = (title, url) => {
+        const card = document.createElement("div");
+        card.classList.add("promotion-card");
 
-    const titleElement = document.createElement("h4");
-    titleElement.textContent = title;
+        const titleElement = document.createElement("h4");
+        titleElement.textContent = title;
 
-    const linkElement = document.createElement("a");
-    linkElement.href = url;
-    linkElement.textContent = "Ver promoción";
-    linkElement.target = "_blank";
+        const linkElement = document.createElement("a");
+        linkElement.href = url;
+        linkElement.textContent = "Ver promoción";
+        linkElement.target = "_blank";
 
-    card.appendChild(titleElement);
-    card.appendChild(linkElement);
-    chatMessages.appendChild(card);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  };
+        card.appendChild(titleElement);
+        card.appendChild(linkElement);
+        chatMessages.appendChild(card);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      };
 
-  const fetchContent = async (pais, idioma, categoria) => {
-    simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
+      const fetchContent = async (pais, idioma, categoria) => {
+        simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
 
-    try {
-      const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
+        try {
+          const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
 
-      if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
+          if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
 
-      const data = await response.json();
-      console.log("Datos recibidos de la API:", data);
+          const data = await response.json();
+          console.log("Datos recibidos de la API:", data);
 
-      displayPromotions(data, idioma);
-    } catch (error) {
-      console.error("Error al obtener datos de la API:", error);
-      simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
-    }
-  };
+          displayPromotions(data, idioma);
+        } catch (error) {
+          console.error("Error al obtener datos de la API:", error);
+          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
+        }
+      };
 
-  const displayPromotions = (data, idioma) => {
-    if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
-      data.api1.data.forEach((item) => {
-        addPromotionCard(item.title, item.url);
+      const displayPromotions = (data, idioma) => {
+        if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
+          data.api1.data.forEach((item) => {
+            addPromotionCard(item.title, item.url);
+          });
+        } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
+          data.api2.data.forEach((item) => {
+            addPromotionCard(item.title, item.url);
+          });
+        } else {
+          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
+        }
+      };
+
+      const askQuestion = () => {
+        const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+
+        if (step === 0) {
+          simulateTyping(() => addMessage(currentMessages.greeting, "bot"));
+        } else if (step === 1) {
+          simulateTyping(() => addMessage(currentMessages.language, "bot"));
+        } else if (step === 2) {
+          simulateTyping(() => addMessage(currentMessages.category, "bot"));
+        } else if (step === 3) {
+          fetchContent(country, languagePreference, category);
+        }
+      };
+
+      sendButton.addEventListener("click", () => {
+        const messageText = messageInput.value.trim().toLowerCase();
+        if (!messageText) return;
+
+        addMessage(messageText, "user");
+
+        const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+
+        if (step === 0) {
+          if (messageText.match(/^[a-z]{2}$/i)) {
+            country = messageText.toUpperCase();
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
+          }
+        } else if (step === 1) {
+          if (messageText === "en" || messageText === "es") {
+            languagePreference = messageText.toUpperCase();
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
+          }
+        } else if (step === 2) {
+          if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
+            category = messageText === "sports" ? "deportes" : messageText;
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
+          }
+        }
+
+        messageInput.value = "";
       });
-    } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
-      data.api2.data.forEach((item) => {
-        addPromotionCard(item.title, item.url);
+
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendButton.click();
+        }
       });
-    } else {
-      simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
-    }
-  };
 
-  const askQuestion = () => {
-    const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
-
-    if (step === 0) {
-      simulateTyping(() => addMessage(currentMessages.greeting, "bot"));
-    } else if (step === 1) {
-      simulateTyping(() => addMessage(currentMessages.language, "bot"));
-    } else if (step === 2) {
-      simulateTyping(() => addMessage(currentMessages.category, "bot"));
-    } else if (step === 3) {
-      fetchContent(country, languagePreference, category);
-    }
-  };
-
-  sendButton.addEventListener("click", () => {
-    const messageText = messageInput.value.trim().toLowerCase();
-    if (!messageText) return;
-
-    addMessage(messageText, "user");
-
-    const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
-
-    if (step === 0) {
-      if (messageText.match(/^[a-z]{2}$/i)) {
-        country = messageText.toUpperCase();
-        step++;
-        askQuestion();
-      } else {
-        simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
-      }
-    } else if (step === 1) {
-      if (messageText === "en" || messageText === "es") {
-        languagePreference = messageText.toUpperCase();
-        step++;
-        askQuestion();
-      } else {
-        simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
-      }
-    } else if (step === 2) {
-      if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
-        category = messageText === "sports" ? "deportes" : messageText;
-        step++;
-        askQuestion();
-      } else {
-        simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
-      }
-    }
-
-    messageInput.value = "";
-  });
-
-  messageInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      sendButton.click();
-    }
-  });
-
-  askQuestion();
-});
+      askQuestion();
+    });
   </script>
 </body>
 
