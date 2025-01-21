@@ -188,23 +188,26 @@
       };
 
       // Función para simular que el bot está escribiendo
-const simulateTyping = (callback, delay = 1000) => {
-  const typingIndicator = document.createElement("div");
-  typingIndicator.classList.add("message", "bot");
-  typingIndicator.textContent = "Escribiendo...";
-  typingIndicator.id = "typingIndicator";
-  chatMessages.appendChild(typingIndicator);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+      const simulateTyping = (callback, delay = 1000) => {
+        const typingIndicator = document.createElement("div");
+        typingIndicator.classList.add("message", "bot");
+        typingIndicator.textContent = "Escribiendo...";
+        typingIndicator.id = "typingIndicator";
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-  setTimeout(() => {
-    typingIndicator.remove();
-    callback();
-  }, delay);
-};
+        setTimeout(() => {
+          typingIndicator.remove();
+          callback();
+        }, delay);
+      };
 
-// Función para buscar promociones con simulación de errores y reintentos
-const fetchContent = async (pais, idioma, categoria) => {
-  simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
+      // Función para buscar promociones con simulación de errores y reintentos
+      const fetchContent = async (pais, idioma, categoria) => {
+  const fetchingMessage = messages[idioma.toLowerCase()].fetching;
+
+  // Simula "Escribiendo..." y muestra el mensaje "Buscando promociones"
+  simulateTyping(() => addMessage(fetchingMessage, "bot"));
 
   try {
     const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
@@ -214,36 +217,41 @@ const fetchContent = async (pais, idioma, categoria) => {
     const data = await response.json();
     console.log("Datos recibidos de la API:", data);
 
+    // Elimina el mensaje "Buscando promociones" antes de mostrar resultados
+    removeLastMessage(fetchingMessage);
+
     displayPromotions(data, idioma);
   } catch (error) {
     console.error("Error al obtener datos de la API:", error);
 
-    // Simulación de error y reintento
-    simulateTyping(() => {
-      addMessage(
-        "Buscando promociones... Oh, espera, cometí un error 🙈. ¡Déjame intentarlo de nuevo!",
-        "bot"
-      );
+    // Elimina el mensaje "Buscando promociones" en caso de error
+    removeLastMessage(fetchingMessage);
 
-      setTimeout(() => fetchContent(pais, idioma, categoria), 2000);
-    }, 1500);
+    simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
   }
 };
 
+// Función para eliminar el último mensaje específico
+const removeLastMessage = (messageText) => {
+  const messages = document.querySelectorAll(".chat-messages .message.bot");
+  const lastMessage = Array.from(messages).find((msg) => msg.textContent === messageText);
+  if (lastMessage) lastMessage.remove();
+};
 
-      const displayPromotions = (data, idioma) => {
-        if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
-          data.api1.data.forEach((item) => {
-            addMessage({ title: item.title, url: item.url }, "bot", true);
-          });
-        } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
-          data.api2.data.forEach((item) => {
-            addMessage({ title: item.title, url: item.url }, "bot", true);
-          });
-        } else {
-          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
-        }
-      };
+const displayPromotions = (data, idioma) => {
+  if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
+    data.api1.data.forEach((item) => {
+      addMessage({ title: item.title, url: item.url }, "bot", true);
+    });
+  } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
+    data.api2.data.forEach((item) => {
+      addMessage({ title: item.title, url: item.url }, "bot", true);
+    });
+  } else {
+    simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
+  }
+};
+
 
       const askQuestion = () => {
         const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
@@ -260,52 +268,52 @@ const fetchContent = async (pais, idioma, categoria) => {
       };
 
       sendButton.addEventListener("click", () => {
-  const messageText = messageInput.value.trim().toLowerCase();
-  if (!messageText) return; // No procesar si el mensaje está vacío
+        const messageText = messageInput.value.trim().toLowerCase();
+        if (!messageText) return; // No procesar si el mensaje está vacío
 
-  addMessage(messageText, "user");
+        addMessage(messageText, "user");
 
-  const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+        const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
 
-  // Manejo de pasos
-  if (step === 0) {
-    if (messageText.match(/^[a-z]{2}$/i)) {
-      country = messageText.toUpperCase();
-      step++;
-      askQuestion();
-    } else {
-      simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
-      simulateTyping(() => {
-        addMessage(
-          "No entiendo el país que mencionas 🤔. Por favor, usa un código de dos letras como CL o PE.",
-          "bot"
-        );
-      }, 1500);
-    }
-  } else if (step === 1) {
-    if (messageText === "en" || messageText === "es") {
-      languagePreference = messageText.toUpperCase();
-      step++;
-      askQuestion();
-    } else {
-      simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
-      simulateTyping(() => {
-        addMessage("Hmm... no entendí el idioma. ¿Podrías responder con EN o ES? 😊", "bot");
-      }, 1500);
-    }
-  } else if (step === 2) {
-    if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
-      category = messageText === "sports" ? "deportes" : messageText;
-      step++;
-      askQuestion();
-    } else {
-      simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
-    }
-  }
+        // Manejo de pasos
+        if (step === 0) {
+          if (messageText.match(/^[a-z]{2}$/i)) {
+            country = messageText.toUpperCase();
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
+            simulateTyping(() => {
+              addMessage(
+                "No entiendo el país que mencionas 🤔. Por favor, usa un código de dos letras como CL o PE.",
+                "bot"
+              );
+            }, 1500);
+          }
+        } else if (step === 1) {
+          if (messageText === "en" || messageText === "es") {
+            languagePreference = messageText.toUpperCase();
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
+            simulateTyping(() => {
+              addMessage("Hmm... no entendí el idioma. ¿Podrías responder con EN o ES? 😊", "bot");
+            }, 1500);
+          }
+        } else if (step === 2) {
+          if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
+            category = messageText === "sports" ? "deportes" : messageText;
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
+          }
+        }
 
-  // Limpiar el campo de entrada
-  messageInput.value = "";
-});
+        // Limpiar el campo de entrada
+        messageInput.value = "";
+      });
 
 
       messageInput.addEventListener("keypress", (e) => {
