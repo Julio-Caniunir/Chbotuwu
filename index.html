@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es-mx">
 
 <head>
   <meta charset="UTF-8">
@@ -19,11 +19,8 @@
 
     .chat-container {
       width: 300px;
-      /* Tamaño reducido */
       max-width: 90%;
-      /* Adaptable a pantallas pequeñas */
       height: 500px;
-      /* Altura específica */
       background-color: #fff;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
@@ -38,7 +35,6 @@
       padding: 10px 15px;
       text-align: center;
       font-size: 18px;
-      /* Tamaño de fuente más pequeño */
       font-weight: bold;
     }
 
@@ -46,7 +42,6 @@
       flex: 1;
       padding: 10px;
       overflow-y: auto;
-      /* Habilita el scroll interno */
       background-color: #f9f9f9;
     }
 
@@ -57,7 +52,6 @@
       max-width: 80%;
       word-wrap: break-word;
       font-size: 14px;
-      /* Tamaño de texto ajustado */
       line-height: 1.4;
     }
 
@@ -65,12 +59,36 @@
       background-color: #007bff;
       color: white;
       align-self: flex-end;
+      animation: slideInRight 0.5s ease-in-out;
     }
 
     .chat-messages .message.bot {
       background-color: #e0e0e0;
       color: black;
       align-self: flex-start;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
 
     .chat-input {
@@ -120,162 +138,167 @@
     </div>
   </div>
   <script>
-   document.addEventListener("DOMContentLoaded", () => {
-  const chatMessages = document.getElementById("chatMessages");
-  const messageInput = document.getElementById("messageInput");
-  const sendButton = document.getElementById("sendButton");
+    document.addEventListener("DOMContentLoaded", () => {
+      const chatMessages = document.getElementById("chatMessages");
+      const messageInput = document.getElementById("messageInput");
+      const sendButton = document.getElementById("sendButton");
 
-  let step = 0; // Controla las preguntas
-  let country = ""; // Guardará el país ingresado
-  let languagePreference = ""; // Guardará el idioma ingresado
-  let category = ""; // Guardará la categoría ingresada
+      let step = 0;
+      let country = "";
+      let languagePreference = "";
+      let category = "";
 
-  const apiUrl = "/api"; // Endpoint de la función serverless
+      const apiUrl = "/api";
 
-  const messages = {
-    es: {
-      greeting: "¡Hola! ¿De qué país eres? (Ejemplo: CL, PE)",
-      language: "¿Prefieres la información en Inglés o Español? (EN/ES)",
-      category: "¿Qué categoría prefieres? (casino/deportes)",
-      fetching: "Buscando promociones, por favor espera...",
-      invalidCountry: "Por favor, ingresa un código de país válido (Ejemplo: CL, PE).",
-      invalidLanguage: "Por favor, responde con EN o ES.",
-      invalidCategory: "Por favor, responde con 'casino' o 'deportes'.",
-      noPromotions: "No se encontraron promociones para la categoría seleccionada.",
-      error: "Hubo un error al obtener las promociones. Por favor, intenta más tarde.",
-    },
-    en: {
-      greeting: "Hello! What country are you from? (Example: CL, PE)",
-      language: "Do you prefer information in English or Spanish? (EN/ES)",
-      category: "What category do you prefer? (casino/sports)",
-      fetching: "Searching for promotions, please wait...",
-      invalidCountry: "Please enter a valid country code (Example: CL, PE).",
-      invalidLanguage: "Please respond with EN or ES.",
-      invalidCategory: "Please respond with 'casino' or 'sports'.",
-      noPromotions: "No promotions were found for the selected category.",
-      error: "An error occurred while fetching promotions. Please try again later.",
-    },
-  };
+      const messages = {
+        es: {
+          greeting: "¡Hola! ¿De qué país eres? (Ejemplo: CL, PE)",
+          language: "¿Prefieres la información en Inglés o Español? (EN/ES)",
+          category: "¿Qué categoría prefieres? (casino/deportes)",
+          fetching: "Buscando promociones, por favor espera...",
+          invalidCountry: "Por favor, ingresa un código de país válido (Ejemplo: CL, PE).",
+          invalidLanguage: "Por favor, responde con EN o ES.",
+          invalidCategory: "Por favor, responde con 'casino' o 'deportes'.",
+          noPromotions: "No se encontraron promociones para la categoría seleccionada.",
+          error: "Hubo un error al obtener las promociones. Por favor, intenta más tarde.",
+        },
+        en: {
+          greeting: "Hello! What country are you from? (Example: CL, PE)",
+          language: "Do you prefer information in English or Spanish? (EN/ES)",
+          category: "What category do you prefer? (casino/sports)",
+          fetching: "Searching for promotions, please wait...",
+          invalidCountry: "Please enter a valid country code (Example: CL, PE).",
+          invalidLanguage: "Please respond with EN or ES.",
+          invalidCategory: "Please respond with 'casino' or 'sports'.",
+          noPromotions: "No promotions were found for the selected category.",
+          error: "An error occurred while fetching promotions. Please try again later.",
+        },
+      };
 
-  const addMessage = (text, sender, isLink = false) => {
-    const message = document.createElement("div");
-    message.classList.add("message", sender);
+      const addMessage = (text, sender, isLink = false) => {
+        const message = document.createElement("div");
+        message.classList.add("message", sender);
 
-    if (isLink) {
-      const link = document.createElement("a");
-      link.href = text.url;
-      link.textContent = text.title;
-      link.target = "_blank"; // Abrir en nueva pestaña
-      link.style.color = sender === "bot" ? "black" : "white"; // Ajusta el color según el remitente
-      message.appendChild(link);
-    } else {
-      message.textContent = text;
-    }
+        if (isLink) {
+          const link = document.createElement("a");
+          link.href = text.url;
+          link.textContent = text.title;
+          link.target = "_blank";
+          message.appendChild(link);
+        } else {
+          message.textContent = text;
+        }
 
-    chatMessages.appendChild(message);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  };
+        chatMessages.appendChild(message);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      };
 
-  const fetchContent = async (pais, idioma, categoria) => {
-    addMessage(messages[idioma.toLowerCase()].fetching, "bot"); // Mensaje al usuario
+      const simulateTyping = (callback, delay = 1000) => {
+        const typingIndicator = document.createElement("div");
+        typingIndicator.classList.add("message", "bot");
+        typingIndicator.textContent = "Escribiendo...";
+        typingIndicator.id = "typingIndicator";
+        chatMessages.appendChild(typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    try {
-      const response = await fetch(
-        `${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`
-      );
+        setTimeout(() => {
+          typingIndicator.remove();
+          callback();
+        }, delay);
+      };
 
-      if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
+      const fetchContent = async (pais, idioma, categoria) => {
+        simulateTyping(() => addMessage(messages[idioma.toLowerCase()].fetching, "bot"));
 
-      const data = await response.json();
-      console.log("Datos recibidos de la API:", data); // Depuración en consola
+        try {
+          const response = await fetch(`${apiUrl}?pais=${pais}&idioma=${idioma}&categoria=${categoria}`);
 
-      displayPromotions(data, idioma);
-    } catch (error) {
-      console.error("Error al obtener datos de la API:", error);
-      addMessage(messages[idioma.toLowerCase()].error, "bot");
-    }
-  };
+          if (!response.ok) throw new Error(`Error ${response.status}: API connection failed.`);
 
-  const displayPromotions = (data, idioma) => {
-    console.log("Datos completos recibidos:", data);
+          const data = await response.json();
+          console.log("Datos recibidos de la API:", data);
 
-    if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
-      data.api1.data.forEach((item) => {
-        addMessage({ title: item.title, url: item.url }, "bot", true);
+          displayPromotions(data, idioma);
+        } catch (error) {
+          console.error("Error al obtener datos de la API:", error);
+          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].error, "bot"));
+        }
+      };
+
+      const displayPromotions = (data, idioma) => {
+        if (data && data.api1 && category === "casino" && Array.isArray(data.api1.data)) {
+          data.api1.data.forEach((item) => {
+            addMessage({ title: item.title, url: item.url }, "bot", true);
+          });
+        } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
+          data.api2.data.forEach((item) => {
+            addMessage({ title: item.title, url: item.url }, "bot", true);
+          });
+        } else {
+          simulateTyping(() => addMessage(messages[idioma.toLowerCase()].noPromotions, "bot"));
+        }
+      };
+
+      const askQuestion = () => {
+        const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+
+        if (step === 0) {
+          simulateTyping(() => addMessage(currentMessages.greeting, "bot"));
+        } else if (step === 1) {
+          simulateTyping(() => addMessage(currentMessages.language, "bot"));
+        } else if (step === 2) {
+          simulateTyping(() => addMessage(currentMessages.category, "bot"));
+        } else if (step === 3) {
+          fetchContent(country, languagePreference, category);
+        }
+      };
+
+      sendButton.addEventListener("click", () => {
+        const messageText = messageInput.value.trim().toLowerCase();
+        if (!messageText) return;
+
+        addMessage(messageText, "user");
+
+        const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
+
+        if (step === 0) {
+          if (messageText.match(/^[a-z]{2}$/i)) {
+            country = messageText.toUpperCase();
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidCountry, "bot"));
+          }
+        } else if (step === 1) {
+          if (messageText === "en" || messageText === "es") {
+            languagePreference = messageText.toUpperCase();
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidLanguage, "bot"));
+          }
+        } else if (step === 2) {
+          if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
+            category = messageText === "sports" ? "deportes" : messageText;
+            step++;
+            askQuestion();
+          } else {
+            simulateTyping(() => addMessage(currentMessages.invalidCategory, "bot"));
+          }
+        }
+
+        messageInput.value = "";
       });
-    } else if (data && data.api2 && category === "deportes" && Array.isArray(data.api2.data)) {
-      data.api2.data.forEach((item) => {
-        addMessage({ title: item.title, url: item.url }, "bot", true);
+
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendButton.click();
+        }
       });
-    } else {
-      addMessage(messages[idioma.toLowerCase()].noPromotions, "bot");
-    }
-  };
 
-  const askQuestion = () => {
-    const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
-
-    if (step === 0) {
-      addMessage(currentMessages.greeting, "bot");
-    } else if (step === 1) {
-      addMessage(currentMessages.language, "bot");
-    } else if (step === 2) {
-      addMessage(currentMessages.category, "bot");
-    } else if (step === 3) {
-      fetchContent(country, languagePreference, category);
-    }
-  };
-
-  sendButton.addEventListener("click", () => {
-    const messageText = messageInput.value.trim().toLowerCase();
-    if (!messageText) return;
-
-    addMessage(messageText, "user");
-
-    const currentMessages = messages[languagePreference.toLowerCase()] || messages.es;
-
-    if (step === 0) {
-      if (messageText.match(/^[a-z]{2}$/i)) {
-        country = messageText.toUpperCase();
-        step++;
-        askQuestion();
-      } else {
-        addMessage(currentMessages.invalidCountry, "bot");
-      }
-    } else if (step === 1) {
-      if (messageText === "en" || messageText === "es") {
-        languagePreference = messageText.toUpperCase();
-        step++;
-        askQuestion();
-      } else {
-        addMessage(currentMessages.invalidLanguage, "bot");
-      }
-    } else if (step === 2) {
-      if (messageText === "casino" || messageText === "deportes" || messageText === "sports") {
-        category = messageText === "sports" ? "deportes" : messageText; // Map 'sports' to 'deportes'
-        step++;
-        askQuestion();
-      } else {
-        addMessage(currentMessages.invalidCategory, "bot");
-      }
-    }
-
-    messageInput.value = ""; // Limpiar el campo de entrada
-  });
-
-  messageInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      sendButton.click();
-    }
-  });
-
-  // Inicia la conversación
-  askQuestion();
-});
+      askQuestion();
+    });
   </script>
-
-
-
 </body>
 
 </html>
